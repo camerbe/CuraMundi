@@ -28,6 +28,22 @@ namespace CuraMundi.Application.BLL.Mappers
 
             };
         }
+        //public static Patient ToPatientForUpdate(this PatientUpdateDto patientUpdateDto)
+        //{
+        //    return new Patient
+        //    {
+                
+        //        Adresse = patientUpdateDto.Adresse,
+        //        DateNaiss = patientUpdateDto.DateNaiss,
+        //        Nom= patientUpdateDto.Nom,
+        //        Prenom= patientUpdateDto.Prenom,
+        //        //Email= patientUpdateDto.Email,
+        //        //UserName= patientUpdateDto.Email,
+        //        PhoneNumber= patientUpdateDto.Telephone,
+              
+
+        //    };
+        //}
         public static PatientDetailDto ToPatientDto(this Patient patient)
         {
             return new PatientDetailDto
