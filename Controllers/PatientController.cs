@@ -1,6 +1,7 @@
 ﻿using CuraMundi.Application.BLL.Dto;
 using CuraMundi.Application.BLL.Mappers;
 using CuraMundi.Domain.Entities;
+using CuraMundi.Dto;
 using CuraMundi.Infrastructure.DAL.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -24,7 +25,7 @@ namespace CuraMundi.Controllers
 
        
         [HttpPost]
-        public async Task<ActionResult<Patient>> CreatePatient([FromBody] PatientCreateDto patientCreateDto)
+        public async Task<ActionResult<PatientDetailDto>> CreatePatient([FromBody] PatientCreateDto patientCreateDto)
         {
             
             Patient patient = patientCreateDto.ToPatient();

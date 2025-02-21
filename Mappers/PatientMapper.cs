@@ -1,5 +1,6 @@
 ﻿using CuraMundi.Application.BLL.Dto;
 using CuraMundi.Domain.Entities;
+using CuraMundi.Dto;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -27,9 +28,9 @@ namespace CuraMundi.Application.BLL.Mappers
 
             };
         }
-        public static PatientCreateDto ToPatientDto(this Patient patient)
+        public static PatientDetailDto ToPatientDto(this Patient patient)
         {
-            return new PatientCreateDto
+            return new PatientDetailDto
             {
                 Id=patient.Id,
                 Adresse = patient.Adresse,
@@ -38,8 +39,9 @@ namespace CuraMundi.Application.BLL.Mappers
                 Prenom=patient.Prenom,
                 Email=patient.Email,
                 Telephone=patient.PhoneNumber,
-                Role="Patient"
-                
+                Role="Patient",
+                FullName = patient.Nom + " " + patient.Prenom
+
             };
         }
 
