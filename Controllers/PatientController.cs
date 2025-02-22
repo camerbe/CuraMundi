@@ -71,7 +71,7 @@ namespace CuraMundi.Controllers
             return Accepted();
         }
         [HttpGet]
-        public async Task<ActionResult<PatientDetailDto>> GetAAl()
+        public async Task<ActionResult<PatientDetailDto>> GetAll()
         {
             IEnumerable<Patient> patients=await _unitOfWork.Patient.GetAllAsync();
             IEnumerable<PatientDetailDto> patientDetailDto = patients.Select(s => s.ToPatientDto());

@@ -1,6 +1,7 @@
 ﻿using CuraMundi.Application.BLL.Dto;
 using CuraMundi.Domain.Entities;
 using CuraMundi.Dto;
+using CuraMundi.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -19,8 +20,8 @@ namespace CuraMundi.Application.BLL.Mappers
                 
                 Adresse = patientCreateDto.Adresse,
                 DateNaiss = patientCreateDto.DateNaiss,
-                Nom=patientCreateDto.Nom,
-                Prenom=patientCreateDto.Prenom,
+                Nom=patientCreateDto.Nom.ToUpperCase(),
+                Prenom=patientCreateDto.Prenom.Capitalize(),
                 Email=patientCreateDto.Email,
                 UserName=patientCreateDto.Email,
                 PhoneNumber=patientCreateDto.Telephone,
@@ -51,12 +52,12 @@ namespace CuraMundi.Application.BLL.Mappers
                 Id=patient.Id,
                 Adresse = patient.Adresse,
                 DateNaiss = patient.DateNaiss,
-                Nom=patient.Nom,
-                Prenom=patient.Prenom,
+                Nom=patient.Nom.ToUpperCase(),
+                Prenom=patient.Prenom.Capitalize(),
                 Email=patient.Email,
                 Telephone=patient.PhoneNumber,
                 Role="Patient",
-                FullName = patient.Nom + " " + patient.Prenom
+                FullName = patient.Nom.ToUpperCase() + " " + patient.Prenom.Capitalize()
 
             };
         }
