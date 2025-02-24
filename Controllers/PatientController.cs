@@ -3,6 +3,7 @@ using CuraMundi.Application.BLL.Interfaces;
 using CuraMundi.Application.BLL.Mappers;
 using CuraMundi.Domain.Entities;
 using CuraMundi.Dto;
+using CuraMundi.Extensions;
 using CuraMundi.Infrastructure.DAL.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -31,9 +32,12 @@ namespace CuraMundi.Controllers
             
             Patient patient = patientCreateDto.ToPatient();
             var usr =await _userManager.CreateAsync(patient, patientCreateDto.Password);
-            
-            await _userManager.AddToRoleAsync(patient, patientCreateDto.Role);
-            return Accepted(patient.ToPatientDto());
+            if (usr.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(patient, patientCreateDto.Role);
+                return Accepted(patient.ToPatientDto());
+            }
+            return BadRequest();
         }
         [HttpGet("{id}")]
         public async Task<ActionResult<PatientDetailDto>> GetOne(Guid id)
@@ -50,9 +54,9 @@ namespace CuraMundi.Controllers
                 Patient user = await _unitOfWork.Patient.GetAsync(i => i.Id == id);
 
                 user.Adresse = patientUpdateDto.Adresse?? user.Adresse;
-                
-                user.Nom = patientUpdateDto.Nom ??  user.Nom;
-                user.Prenom = patientUpdateDto.Prenom ??  user.Prenom;
+
+                user.Nom = patientUpdateDto.Nom.ToUpperCase() ?? user.Nom;
+                user.Prenom = patientUpdateDto.Prenom.Capitalize() ??  user.Prenom;
                 user.PhoneNumber = patientUpdateDto.Telephone ??  user.PhoneNumber;
                 user.DateNaiss = patientUpdateDto.DateNaiss ??  user.DateNaiss;
                 

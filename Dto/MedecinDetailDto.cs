@@ -13,6 +13,6 @@ namespace CuraMundi.Dto
         public string? Email { get; set; }
         public string? Telephone { get; set; }
         public string FullName { get; set; }
-        public Specialite Specialite { get; set; }
+        public SpecialiteDto Specialite { get; set; }
     }
 }

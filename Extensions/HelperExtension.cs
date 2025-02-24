@@ -3,13 +3,11 @@
     public static class HelperExtension
     {
         public static string ToUpperCase(this string input) => string.IsNullOrEmpty(input) ? input : input.ToUpper();
-        public static string Capitalize(this string str)
+        public static string Capitalize(this string input)
         {
-            if (string.IsNullOrEmpty(str))
-            {
-                return str;
-            }
-            return char.ToUpper(str[0]) + str.Substring(1);
+            if (string.IsNullOrEmpty(input)) return input;
+            return string.Join(" ", input.Split(' ')
+                .Select(word => char.ToUpper(word[0]) + word.Substring(1).ToLower()));
         }
     }
 }
