@@ -1,8 +1,10 @@
 ﻿using CuraMundi.Application.BLL.Dto;
 using CuraMundi.Application.BLL.Interfaces;
+using CuraMundi.Application.BLL.Mappers;
 using CuraMundi.Domain.Entities;
 using CuraMundi.Dto;
 using CuraMundi.Extensions;
+using CuraMundi.Infrastructure.DAL.Data.Configs;
 using CuraMundi.Mappers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -17,11 +19,14 @@ namespace CuraMundi.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<User> _userManager;
-
-        public MedecinController(IUnitOfWork unitOfWork, UserManager<User> userManager)
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly RoleSeeder _roleSeeder;
+        public MedecinController(IUnitOfWork unitOfWork, UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _roleManager = roleManager;
+            _roleSeeder = new RoleSeeder(_roleManager, _userManager);
         }
         [HttpPost]
         public async Task<ActionResult<MedecinDetailDto>> CreateMedecin([FromBody] MedecinCreateDto medecinCreateDto)
@@ -30,9 +35,10 @@ namespace CuraMundi.Controllers
             var toubib = await _userManager.CreateAsync(medecin, medecinCreateDto.Password);
             if (toubib.Succeeded)
             {
+                await _roleSeeder.SeedRolesAsync();
                 await _userManager.AddToRoleAsync(medecin, medecinCreateDto.Role);
                 medecin.Specialite = await _unitOfWork.Specialite.GetAsync(i => i.Id == medecin.SpecialiteId);
-                //Medecin innerMedecin = await _userManager.Users.Include(u => u.Specialie);
+                
                 return Accepted(medecin.ToMedecinDto());
             }
             return BadRequest();
@@ -73,11 +79,12 @@ namespace CuraMundi.Controllers
                 medecin.SpecialiteId = medecinUpdateDto.SpecialiteId ?? medecin.SpecialiteId;
                 await _unitOfWork.Medecin.Update(medecin);
                 await _unitOfWork.Save();
-
-                return Accepted(medecin.ToMedecinDto);
+                Medecin toubib =await _unitOfWork.Medecin.GetOneMedecin(id);
+                return Accepted(toubib.ToMedecinDto());
             }
             
             return BadRequest();
         }
+        
     }
 }

@@ -4,10 +4,14 @@ using CuraMundi.Application.BLL.Mappers;
 using CuraMundi.Domain.Entities;
 using CuraMundi.Dto;
 using CuraMundi.Extensions;
+using CuraMundi.Infrastructure.DAL.Data.Configs;
 using CuraMundi.Infrastructure.DAL.Repositories;
+using CuraMundi.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text;
 
 namespace CuraMundi.Controllers
 {
@@ -17,24 +21,39 @@ namespace CuraMundi.Controllers
     {
         private readonly UserManager<User> _userManager;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+        private readonly RoleSeeder _roleSeeder;
+        private readonly IEmailConfirmationService _emailService;
+        private readonly IConfiguration _config;
 
-        public PatientController(UserManager<User> userManager, IUnitOfWork unitOfWork)
+        public PatientController(
+            UserManager<User> userManager, 
+            IUnitOfWork unitOfWork, 
+            RoleManager<IdentityRole<Guid>> roleManager,
+            IEmailConfirmationService emailService,
+            IConfiguration config
+            )
         //public PatientController(UserManager<User> userManager)
         {
             _userManager = userManager;
             _unitOfWork = unitOfWork;
+            _roleManager = roleManager;
+            _roleSeeder = new RoleSeeder(_roleManager, _userManager);
+            _emailService = emailService;
+            _config = config;
         }
 
        
         [HttpPost]
         public async Task<ActionResult<PatientDetailDto>> CreatePatient([FromBody] PatientCreateDto patientCreateDto)
         {
-            
             Patient patient = patientCreateDto.ToPatient();
-            var usr =await _userManager.CreateAsync(patient, patientCreateDto.Password);
+            var usr = await _userManager.CreateAsync(patient, patientCreateDto.Password);
             if (usr.Succeeded)
             {
+                await _roleSeeder.SeedRolesAsync();
                 await _userManager.AddToRoleAsync(patient, patientCreateDto.Role);
+                await _emailService.SendConfirmedEmailAsync(patient, null);
                 return Accepted(patient.ToPatientDto());
             }
             return BadRequest();
@@ -70,9 +89,9 @@ namespace CuraMundi.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeletePatient(Guid id)
         {
-            _unitOfWork.Patient.RemoveAsync<Patient>(id);
-            await _unitOfWork.Save();
-            return Accepted();
+            User patient = await _userManager.FindByIdAsync(id.ToString());
+            var result = await _userManager.DeleteAsync(patient);
+            return result.Succeeded ? Accepted() : BadRequest();
         }
         [HttpGet]
         public async Task<ActionResult<PatientDetailDto>> GetAll()
@@ -81,6 +100,19 @@ namespace CuraMundi.Controllers
             IEnumerable<PatientDetailDto> patientDetailDto = patients.Select(s => s.ToPatientDto());
             return Accepted(patientDetailDto);
         }
-
+        #region Helper
+        //private async Task<bool> SendConfirmedEmailAsync(User user)
+        //{
+        //    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        //    token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+        //    var url = $"{_config["JWT:Issuer"]}/api/Auth/email-confirm/?email={user.Email}&token={token}";
+        //    var body = $"<p>Bonjour {user.Prenom} {user.Nom}</p>" +
+        //                "<<p>Afin de pouvoir activer votre compte, nous devons valider votre adresse email. Cliquez simplement sur le lien :</p>" +
+        //                $"<p><a style='padding:3px;background:blue;color:white' href='{url}'>Activer mon compte</a></p>" +
+        //                "<p>Bienvenue à bord !</p>";
+        //    var emailSend = new EmailSendDTO(user.Email, "Confirmation", body);
+        //    return await _emailService.SendEmailAsync(emailSend);
+        //}
+        #endregion
     }
 }
