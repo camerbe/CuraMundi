@@ -7,6 +7,7 @@ using CuraMundi.Extensions;
 using CuraMundi.Infrastructure.DAL.Data.Configs;
 using CuraMundi.Infrastructure.DAL.Repositories;
 using CuraMundi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ using System.Text;
 
 namespace CuraMundi.Controllers
 {
+    [Authorize(Roles = "Admin,Patient,Secretaire")]
     [Route("api/[controller]")]
     [ApiController]
     public class PatientController : ControllerBase
@@ -43,10 +45,16 @@ namespace CuraMundi.Controllers
             _config = config;
         }
 
-       
+        //[Authorize("Admin,Patient,Secretaire")]
         [HttpPost]
         public async Task<ActionResult<PatientDetailDto>> CreatePatient([FromBody] PatientCreateDto patientCreateDto)
         {
+            bool emailIsNull = (patientCreateDto.Email is null)? true:false;
+            if (emailIsNull)
+            {
+                patientCreateDto.Email= patientCreateDto.Nom + "." + patientCreateDto.Prenom + "@gmail.com";
+                patientCreateDto.Password = patientCreateDto.Nom + "." + patientCreateDto.Prenom;
+            }
             Patient patient = patientCreateDto.ToPatient();
             var usr = await _userManager.CreateAsync(patient, patientCreateDto.Password);
             if (usr.Succeeded)
@@ -58,6 +66,7 @@ namespace CuraMundi.Controllers
             }
             return BadRequest();
         }
+        //[Authorize("Admin,Patient,Secretaire,Medecin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<PatientDetailDto>> GetOne(Guid id)
         {
@@ -65,6 +74,7 @@ namespace CuraMundi.Controllers
             Patient patient = await _unitOfWork.Patient.GetAsync(i =>i.Id==id);
             return Accepted(patient.ToPatientDto());
         }
+        //[Authorize("Admin,Patient,Secretaire")]
         [HttpPut("{id}")]
         public async Task<ActionResult<PatientDetailDto>> UpdatePatient(Guid id, [FromForm] PatientUpdateDto patientUpdateDto)
         {
@@ -86,6 +96,7 @@ namespace CuraMundi.Controllers
             return BadRequest();
             
         }
+        //[Authorize("Admin,Patient,Secretaire")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeletePatient(Guid id)
         {
@@ -93,6 +104,7 @@ namespace CuraMundi.Controllers
             var result = await _userManager.DeleteAsync(patient);
             return result.Succeeded ? Accepted() : BadRequest();
         }
+        //[Authorize("Admin,Secretaire")]
         [HttpGet]
         public async Task<ActionResult<PatientDetailDto>> GetAll()
         {

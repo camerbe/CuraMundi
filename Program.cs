@@ -91,6 +91,26 @@ builder.Services.AddAuthentication(options =>
         };
     }
   );
+builder.Services.AddCors(options =>
+{
+    // pas de sécurité, tout le monde peut accèder à l'API.
+    // utile pour le développement mais à NE PAS UTILISER EN PRODUCTION
+    options.AddPolicy("FFA", policy => {
+        policy.AllowAnyOrigin();
+        policy.AllowAnyMethod();
+        policy.AllowAnyHeader();
+    });
+
+    // Configuration de sécurité pour le développement
+    // uniquement les clients avec ces URLs spécifiques peuvent accèder à l'API
+    options.AddPolicy("Dev", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200", "http://demo.be");
+        policy.AllowAnyMethod();
+        policy.AllowAnyHeader();
+    });
+}
+);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -102,6 +122,7 @@ if (app.Environment.IsDevelopment())
 
 
 app.UseMiddleware<ExceptionMiddleware>();
+app.UseCors("Dev"); // on utilise la policy "Dev" définie plus haut
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

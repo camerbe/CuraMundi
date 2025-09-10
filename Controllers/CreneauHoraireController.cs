@@ -2,14 +2,17 @@
 using CuraMundi.Domain.Entities;
 using CuraMundi.Dto;
 using CuraMundi.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CuraMundi.Controllers
 {
+    [Authorize(Roles = "Admin,Medecin,Secretaire")]
     [Route("api/[controller]")]
     [ApiController]
+    
     public class CreneauHoraireController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -34,6 +37,7 @@ namespace CuraMundi.Controllers
             return BadRequest();
 
         }
+        //[Authorize("Admin,Medecin,Secretaire")]
         [HttpGet("{id}")]
         public async Task<ActionResult<CreneauHoraireDetailDto>> GetOneCreneauHoraire(Guid id)
         {
@@ -58,6 +62,7 @@ namespace CuraMundi.Controllers
             }
             return BadRequest();
         }
+        //[Authorize("Admin,Medecin,Secretaire")]
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteCreneauHoraire(Guid id)
         {
@@ -66,6 +71,7 @@ namespace CuraMundi.Controllers
             await _unitOfWork.Save();
             return  Accepted();
         }
+        //[Authorize("Admin,Medecin,Secretaire")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CreneauHoraireDetailDto>>> GetAllCreneauxHoraires()
         {

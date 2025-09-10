@@ -6,6 +6,7 @@ using CuraMundi.Dto;
 using CuraMundi.Extensions;
 using CuraMundi.Infrastructure.DAL.Data.Configs;
 using CuraMundi.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,8 +14,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CuraMundi.Controllers
 {
+    [Authorize(Roles = "Admin,Medecin,Secretaire")]
     [Route("api/[controller]")]
     [ApiController]
+    
     public class MedecinController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -28,6 +31,7 @@ namespace CuraMundi.Controllers
             _roleManager = roleManager;
             _roleSeeder = new RoleSeeder(_roleManager, _userManager);
         }
+        //[Authorize("Admin,Secretaire")]
         [HttpPost]
         public async Task<ActionResult<MedecinDetailDto>> CreateMedecin([FromBody] MedecinCreateDto medecinCreateDto)
         {
@@ -44,6 +48,7 @@ namespace CuraMundi.Controllers
             return BadRequest();
             
         }
+        //[Authorize("Admin,Secretaire")]
         [HttpGet]
         public async Task<ActionResult<MedecinDetailDto>> GetAll()
         {
@@ -52,12 +57,14 @@ namespace CuraMundi.Controllers
             return Accepted(medecinDetailDto);
 
         }
+        //[Authorize("Admin,Secretaire")]
         [HttpGet("{id}")]
         public async Task<ActionResult<MedecinDetailDto>> GetMedecin(Guid id)
         {
             Medecin medecin =  await _unitOfWork.Medecin.GetOneMedecin(id);
             return Accepted(medecin.ToMedecinDto());
         }
+        //[Authorize("Admin,Secretaire")]
         [HttpDelete]
         public async Task<ActionResult<Medecin>> DeleteMedecin(Guid id)
         {
@@ -65,6 +72,7 @@ namespace CuraMundi.Controllers
             var result = await _userManager.DeleteAsync(medecin);
             return result.Succeeded ? Accepted() : BadRequest();
         }
+        //[Authorize("Admin,Secretaire")]
         [HttpPut("{id}")]
         public async Task<ActionResult<MedecinDetailDto>> UpdateMedecin(Guid id, [FromForm] MedecinUpdateDto medecinUpdateDto)
         {

@@ -2,11 +2,14 @@
 using CuraMundi.Domain.Entities;
 using CuraMundi.Dto;
 using CuraMundi.Mappers;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CuraMundi.Controllers
 {
+    [Authorize(Roles = "Admin,Medecin,Secretaire,Patient")]
+
     [Route("api/[controller]")]
     [ApiController]
     public class RendezVousController : ControllerBase
@@ -17,7 +20,7 @@ namespace CuraMundi.Controllers
         {
             _unitOfWork = unitOfWork;
         }
-
+        
         [HttpPost]
         public async Task<ActionResult<RendezVousDetailDto>> CreateRendezVous([FromBody] RendezVousCreateDto rendezVousCreateDto)
         {
@@ -34,12 +37,14 @@ namespace CuraMundi.Controllers
                 return BadRequest(e.Message);
             }
         }
+        //[Authorize("Admin,Secretaire,Patient,Medecin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<RendezVousDetailDto>> GetRendezVous(Guid id)
         {
             RendezVous rendezVous = await _unitOfWork.RendezVous.GetOneRendezVous(id);
             return Accepted(rendezVous.ToRendezVousDto());
         }
+        //[Authorize("Admin,Secretaire,Medecin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<RendezVousDetailDto>> UpdateRendezVous(Guid id, [FromBody] RendezVousUpdateDto rendezVousUpdateDto)
         {
@@ -56,6 +61,7 @@ namespace CuraMundi.Controllers
             }
             return BadRequest();
         }
+        //[Authorize("Admin,Secretaire,Patient,Medecin")]
         [HttpDelete("{id}")]
         public async Task<ActionResult<RendezVous>> DeleteRendezVous(Guid id)
         {
@@ -63,6 +69,7 @@ namespace CuraMundi.Controllers
             _unitOfWork.Save();
             return Accepted();
         }
+        //[Authorize("Admin,Secretaire,Patient,Medecin")]
         [HttpGet]
         public async Task<ActionResult<RendezVousDetailDto>> GetAll()
         {
@@ -70,6 +77,7 @@ namespace CuraMundi.Controllers
             IEnumerable<RendezVousDetailDto> rendezVousDetailDto = rendezVous.Select(s => s.ToRendezVousDto());
             return Accepted(rendezVousDetailDto);
         }
+        //[Authorize("Admin,Secretaire,Medecin")]
         [HttpGet("medecin/{id}")]
         public async Task<ActionResult<RendezVousDetailDto>> GetRendezVousByMedecin(Guid id)
         {

@@ -31,11 +31,12 @@ namespace CuraMundi.Controllers
             {
                 return BadRequest("Invalid credentials");
             }
-
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault();
             var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
             if (result.Succeeded)
             {
-                return Accepted(_jwtService.GenerateJwtToken(user));
+                return Accepted(_jwtService.GenerateJwtToken(user,role));
             }
             return BadRequest("Invalid credentials");
         }
